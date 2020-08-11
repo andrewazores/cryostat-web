@@ -37,9 +37,25 @@
  */
 import { from, Observable, ObservableInput, of, ReplaySubject } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
-import { catchError, combineLatest, concatMap, first, map, tap } from 'rxjs/operators';
+import { catchError, combineLatest, concatMap, first, flatMap, map, tap } from 'rxjs/operators';
 import { TargetService } from './Target.service';
 import { Notifications } from '@app/Notifications/Notifications';
+
+class HttpError extends Error {
+  readonly statusCode: number;
+
+  constructor(httpResponse: Response) {
+    super(httpResponse.statusText);
+    this.statusCode = httpResponse.status;
+  }
+}
+
+const isHttpError = (toCheck: any): toCheck is HttpError => {
+  if (!(toCheck instanceof Error)) {
+    return false;
+  }
+  return (toCheck as HttpError).statusCode !== undefined;
+}
 
 export class ApiService {
 
@@ -208,7 +224,7 @@ export class ApiService {
           throw response.statusText;
         }
       }),
-      catchError((e: Error): ObservableInput<void> => of()),
+      catchError((): ObservableInput<void> => of()),
     );
   }
 
@@ -226,7 +242,7 @@ export class ApiService {
         }
         return true;
       }),
-      catchError((e: Error): ObservableInput<boolean> => of(false)),
+      catchError((): ObservableInput<boolean> => of(false)),
     );
   }
 
@@ -255,7 +271,7 @@ export class ApiService {
               if (resp.ok) return resp;
               throw new HttpError(resp);
             }),
-            catchError((err, caught) => this.handleError<Response>(err, req)),
+            catchError(err => this.handleError<Response>(err, req)),
             concatMap(resp => resp.blob()),
           );
       req().subscribe(resp =>
@@ -279,7 +295,7 @@ export class ApiService {
             if (resp.ok) return resp;
             throw new HttpError(resp);
           }),
-          catchError((err, caught) => this.handleError<Response>(err, req)),
+          catchError(err => this.handleError<Response>(err, req)),
           concatMap(resp => resp.blob()),
         );
       req().subscribe(resp =>
@@ -326,7 +342,7 @@ export class ApiService {
         const target = parts[1];
         if (!!target && this.target.hasCredentials(target)) {
           const credentials = this.target.getCredentials(target);
-          if (!!credentials) {
+          if (credentials) {
             headers.set('X-JMX-Authorization', `Basic ${this.target.getCredentials(target)}`);
           }
         }
@@ -349,7 +365,7 @@ export class ApiService {
         if (resp.ok) return resp;
         throw new HttpError(resp);
       }),
-      catchError((err, caught) => this.handleError<Response>(err, req)),
+      catchError(err => this.handleError<Response>(err, req)),
     );
     return req();
   }
@@ -386,22 +402,6 @@ export class ApiService {
     throw error;
   }
 
-}
-
-class HttpError extends Error {
-  readonly statusCode: number;
-
-  constructor(httpResponse: Response) {
-    super(httpResponse.statusText);
-    this.statusCode = httpResponse.status;
-  }
-}
-
-const isHttpError = (toCheck: any): toCheck is HttpError => {
-  if (!(toCheck instanceof Error)) {
-    return false;
-  }
-  return (toCheck as HttpError).statusCode !== undefined;
 }
 
 export interface SavedRecording {
