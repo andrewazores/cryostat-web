@@ -65,7 +65,7 @@ export const Login = (props) => {
         }
       })
     );
-  }, [context.api, token, authMethod, onLoginSuccess]);
+  }, [addSubscription, context.api, onLoginSuccess]);
 
   const handleSubmit = (evt, token, authMethod) => {
     setToken(token);

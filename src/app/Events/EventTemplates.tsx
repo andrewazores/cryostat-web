@@ -85,7 +85,7 @@ export const EventTemplates = () => {
     setFilteredTemplates([...filtered]);
   }, [filterText, templates, sortBy]);
 
-  const refreshTemplates = () => {
+  const refreshTemplates = React.useCallback(() => {
     addSubscription(
       context.target.target()
       .pipe(
@@ -93,11 +93,11 @@ export const EventTemplates = () => {
         first(),
       ).subscribe(setTemplates)
     );
-  };
+  }, [addSubscription, context.target, context.api]);
 
   React.useEffect(() => {
     refreshTemplates();
-  }, [context.commandChannel]);
+  }, [refreshTemplates]);
 
   const displayTemplates = React.useMemo(
     () => filteredTemplates.map((t: EventTemplate) => ([ t.name, t.description, t.provider, t.type.charAt(0).toUpperCase() + t.type.slice(1).toLowerCase() ])),

@@ -91,7 +91,7 @@ export const ActiveRecordingsList: React.FunctionComponent<ActiveRecordingsListP
     routerHistory.push(`${url}/create`);
   };
 
-  const refreshRecordingList = () => {
+  const refreshRecordingList = React.useCallback(() => {
     addSubscription(
       context.target.target()
       .pipe(
@@ -103,7 +103,7 @@ export const ActiveRecordingsList: React.FunctionComponent<ActiveRecordingsListP
         }
       })
     );
-  };
+  }, [addSubscription, context.target, context.api, recordings]);
 
   const handleArchiveRecordings = () => {
     const tasks: Observable<boolean>[] = [];
@@ -160,7 +160,12 @@ export const ActiveRecordingsList: React.FunctionComponent<ActiveRecordingsListP
     refreshRecordingList();
     const id = window.setInterval(() => refreshRecordingList(), 30_000);
     return () => window.clearInterval(id);
-  }, [context.commandChannel]);
+  }, [refreshRecordingList]);
+
+  const toggleExpanded = React.useCallback((id) => {
+    const idx = expandedRows.indexOf(id);
+    setExpandedRows(expandedRows => idx >= 0 ? [...expandedRows.slice(0, idx), ...expandedRows.slice(idx + 1, expandedRows.length)] : [...expandedRows, id]);
+  }, [expandedRows]);
 
   const RecordingRow = (props) => {
     const expandedRowId =`active-table-row-${props.index}-exp`;
@@ -201,7 +206,7 @@ export const ActiveRecordingsList: React.FunctionComponent<ActiveRecordingsListP
           {props.recording.state}
         </DataListCell>
       </>
-    }, [props.recording]);
+    }, [props.recording, props.index]);
 
     return (
       <DataListItem aria-labelledby={`table-row-${props.index}-1`} isExpanded={isExpanded} >
@@ -222,11 +227,6 @@ export const ActiveRecordingsList: React.FunctionComponent<ActiveRecordingsListP
         </DataListContent>
       </DataListItem>
     );
-  };
-
-  const toggleExpanded = (id) => {
-    const idx = expandedRows.indexOf(id);
-    setExpandedRows(expandedRows => idx >= 0 ? [...expandedRows.slice(0, idx), ...expandedRows.slice(idx + 1, expandedRows.length)] : [...expandedRows, id]);
   };
 
   const RecordingsToolbar = () => {
@@ -263,7 +263,7 @@ export const ActiveRecordingsList: React.FunctionComponent<ActiveRecordingsListP
           ))
         }
       </>;
-    }, [checkedIndices]);
+    }, [checkedIndices, isStopDisabled]);
 
     return (
       <Toolbar id="active-recordings-toolbar">
@@ -311,7 +311,7 @@ export const RecordingActions: React.FunctionComponent<RecordingActionsProps> = 
     return () => sub.unsubscribe();
   }, [context.commandChannel]);
 
-  const grafanaUpload = () => {
+  const grafanaUpload = React.useCallback(() => {
     notifications.info('Upload Started', `Recording "${props.recording.name}" uploading...`);
     addSubscription(
       context.api.uploadRecordingToGrafana(props.recording.name)
@@ -323,15 +323,15 @@ export const RecordingActions: React.FunctionComponent<RecordingActionsProps> = 
         }
       })
     );
-  };
+  }, [notifications, props.recording.name, addSubscription, context.api, context.commandChannel]);
 
-  const handleDownloadRecording = () => {
+  const handleDownloadRecording = React.useCallback(() => {
     context.api.downloadRecording(props.recording);
-  };
+  }, [context.api, props.recording]);
 
-  const handleDownloadReport = () => {
+  const handleDownloadReport = React.useCallback(() => {
     context.api.downloadReport(props.recording);
-  };
+  }, [context.api, props.recording]);
 
   const actionItems = React.useMemo(() => {
     const actionItems = [

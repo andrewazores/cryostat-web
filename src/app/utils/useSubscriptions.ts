@@ -44,13 +44,13 @@ export function useSubscriptions() {
 
   React.useEffect(() => () => subsRef.current.forEach((s: Subscription): void => s.unsubscribe()), []);
 
-  const addSubscription = (sub: Subscription): void => {
+  const addSubscription = React.useCallback((sub: Subscription): void => {
     setSubscriptions((subs: Subscription[]): Subscription[] => {
       const result = subs.concat([sub]);
       subsRef.current = result;
       return result;
     });
-  };
+  }, []);
 
   return addSubscription;
 }

@@ -64,21 +64,21 @@ export const ArchivedRecordingsList: React.FunctionComponent<ArchivedRecordingsL
     'Name'
   ];
 
-  const handleHeaderCheck = (checked) => {
+  const handleHeaderCheck = React.useCallback((checked) => {
     setHeaderChecked(checked);
     setCheckedIndices(checked ? Array.from(new Array(recordings.length), (x, i) => i) : []);
-  };
+  }, [headerChecked, checkedIndices, recordings]);
 
-  const handleRowCheck = (checked, index) => {
+  const handleRowCheck = React.useCallback((checked, index) => {
     if (checked) {
       setCheckedIndices(ci => ([...ci, index]));
     } else {
       setHeaderChecked(false);
       setCheckedIndices(ci => ci.filter(v => v !== index));
     }
-  };
+  }, []);
 
-  const refreshRecordingList = () => {
+  const refreshRecordingList = React.useCallback(() => {
     addSubscription(
       context.api.doGet<Recording[]>(`recordings`)
       .pipe(first())
@@ -88,10 +88,10 @@ export const ArchivedRecordingsList: React.FunctionComponent<ArchivedRecordingsL
         }
       })
     );
-  };
+  }, [addSubscription, context.api, recordings]);
 
-  const handleDeleteRecordings = () => {
-    const tasks: Observable<any>[] = [];
+  const handleDeleteRecordings = React.useCallback(() => {
+    const tasks: Observable<{}>[] = [];
     recordings.forEach((r: Recording, idx) => {
       if (checkedIndices.includes(idx)) {
         handleRowCheck(false, idx);
@@ -103,39 +103,39 @@ export const ArchivedRecordingsList: React.FunctionComponent<ArchivedRecordingsL
     addSubscription(
       forkJoin(tasks).subscribe(refreshRecordingList)
     );
-  };
+  }, [recordings, checkedIndices, handleRowCheck, context.api, addSubscription, refreshRecordingList]);
 
-  const toggleExpanded = (id) => {
+  const toggleExpanded = React.useCallback((id) => {
     const idx = expandedRows.indexOf(id);
     setExpandedRows(expandedRows => idx >= 0 ? [...expandedRows.slice(0, idx), ...expandedRows.slice(idx + 1, expandedRows.length)] : [...expandedRows, id]);
-  };
+  }, [expandedRows]);
 
   React.useEffect(() => {
     const sub = props.updater.subscribe(refreshRecordingList);
     return () => sub.unsubscribe();
-  }, [props.updater])
+  }, [props.updater, refreshRecordingList])
 
   React.useEffect(() => {
     refreshRecordingList();
     const id = window.setInterval(refreshRecordingList, 30_000);
     return () => window.clearInterval(id);
-  }, [context.commandChannel]);
+  }, [context.commandChannel, refreshRecordingList]);
 
   const RecordingRow = (props) => {
-    const expandedRowId =`archived-table-row-${props.index}-exp`;
-    const handleToggle = () => {
+    const expandedRowId = React.useMemo(() => `archived-table-row-${props.index}-exp`, [props.index]);
+    const handleToggle = React.useCallback(() => {
       toggleExpanded(expandedRowId);
-    };
+    }, [expandedRowId, toggleExpanded]);
 
     const isExpanded = React.useMemo(() => {
       return expandedRows.includes(expandedRowId);
     }, [expandedRows, expandedRowId]);
 
-    const handleCheck = (checked) => {
+    const handleCheck = React.useCallback((checked) => {
       handleRowCheck(checked, props.index);
-    };
+    }, [handleRowCheck, props.index]);
 
-    return (<>
+    return React.useMemo(() => (<>
       <DataListItem aria-labelledby={`table-row-${props.index}-1`} name={`row-${props.index}-check`} isExpanded={isExpanded} >
         <DataListItemRow>
           <DataListCheck aria-labelledby="table-row-1-1" name={`row-${props.index}-check`} onChange={handleCheck} isChecked={checkedIndices.includes(props.index)} />
@@ -157,10 +157,10 @@ export const ArchivedRecordingsList: React.FunctionComponent<ArchivedRecordingsL
           <ReportFrame recording={props.recording} width="100%" height="640" />
         </DataListContent>
       </DataListItem>
-    </>);
+    </>), [props.index, isExpanded, handleCheck, checkedIndices, handleToggle, isExpanded, props.recording, props.recording.name]);
   };
 
-  const RecordingsToolbar = () => {
+  const RecordingsToolbar = React.useMemo(() => {
     return (
       <Toolbar id="archived-recordings-toolbar">
         <ToolbarContent>
@@ -170,16 +170,16 @@ export const ArchivedRecordingsList: React.FunctionComponent<ArchivedRecordingsL
         </ToolbarContent>
       </Toolbar>
     );
-  };
+  }, [handleDeleteRecordings, checkedIndices]);
 
   const recordingRows = React.useMemo(() => {
     return recordings.map((r, idx) => <RecordingRow key={idx} recording={r} index={idx}/>)
-  }, [recordings, expandedRows, checkedIndices]);
+  }, [recordings, expandedRows]);
 
   return (<>
     <RecordingsDataTable
         listTitle="Archived Flight Recordings"
-        toolbar={<RecordingsToolbar />}
+        toolbar={RecordingsToolbar}
         tableColumns={tableColumns}
         isHeaderChecked={headerChecked}
         onHeaderCheck={handleHeaderCheck}

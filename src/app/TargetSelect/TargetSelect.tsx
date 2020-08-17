@@ -69,7 +69,7 @@ export const TargetSelect: React.FunctionComponent<TargetSelectProps> = (props) 
         setLoading(false);
       })
     );
-  }, [context.api]);
+  }, [addSubscription, context.api]);
 
   React.useEffect(() => {
     const sub = context.commandChannel.isReady()

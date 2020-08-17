@@ -79,7 +79,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({children}) => {
   const onPageResize = (props: { mobileView: boolean; windowSize: number }) => {
     setIsMobileView(props.mobileView);
   };
-  const mobileOnSelect = (selected) => {
+  const mobileOnSelect = () => {
     if(isMobileView) setIsNavOpenMobile(false)
   };
   const Header = (

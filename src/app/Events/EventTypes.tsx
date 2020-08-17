@@ -86,7 +86,7 @@ export const EventTypes = () => {
   React.useEffect(() => {
     const sub = context.target.target().pipe(concatMap(target => context.api.doGet<EventType[]>(`targets/${encodeURIComponent(target)}/events`))).subscribe(setTypes)
     return () => sub.unsubscribe();
-  }, [context.commandChannel]);
+  }, [context.target, context.api]);
 
   const getCategoryString = (eventType: EventType): string => {
     return eventType.category.join(', ').trim();

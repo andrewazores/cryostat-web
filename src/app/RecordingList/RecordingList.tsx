@@ -56,7 +56,7 @@ export const RecordingList = () => {
 
   React.useEffect(() => {
     return () => archiveUpdate.complete();
-  }, []);
+  }, [archiveUpdate]);
 
   const cardBody = React.useMemo(() => {
     return archiveEnabled ? (
@@ -74,7 +74,7 @@ export const RecordingList = () => {
         <ActiveRecordingsList archiveEnabled={false}/>
       </>
     );
-  }, [archiveEnabled, activeTab]);
+  }, [archiveEnabled, activeTab, archiveUpdate]);
 
   return (
     <TargetView pageTitle="Recordings">
