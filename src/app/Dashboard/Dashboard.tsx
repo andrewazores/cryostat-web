@@ -42,6 +42,7 @@ import { Target } from '@app/Shared/Services/Target.service';
 import { useSubscriptions } from '@app/utils/useSubscriptions';
 import { TargetView } from '@app/TargetView/TargetView';
 import { TargetDetailsWidget } from './Widgets/TargetDetailsWidget';
+import { ArchivesWidget } from './Widgets/ArchivesWidget';
 import { AddWidget } from './Widgets/AddWidget';
 import { ScoreWidget } from './Widgets/ScoreWidget';
 import { Datapoint, TimeseriesWidget } from './Widgets/TimeseriesWidget';
@@ -72,6 +73,7 @@ export const Dashboard = () => {
     setViews(old => {
       return [
         <TargetDetailsWidget target={target} />,
+        <ArchivesWidget target={target} />,
         <ScoreWidget title="Automated Analysis" scores={[
           {
             label: 'CPU Load',
