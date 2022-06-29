@@ -23,6 +23,7 @@
     "yarn:frzinstall": "yarn install --frozen-lockfile"
   },
   "devDependencies": {
+    "@patternfly/react-charts": "^6.74.3",
     "@testing-library/dom": "^8.11.3",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.4",

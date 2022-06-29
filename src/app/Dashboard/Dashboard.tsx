@@ -36,12 +36,82 @@
  * SOFTWARE.
  */
 import * as React from 'react';
+import { Gallery, GalleryItem } from '@patternfly/react-core';
+import { ServiceContext } from '@app/Shared/Services/Services';
+import { Target } from '@app/Shared/Services/Target.service';
+import { useSubscriptions } from '@app/utils/useSubscriptions';
 import { TargetView } from '@app/TargetView/TargetView';
+import { TargetDetailsWidget } from './Widgets/TargetDetailsWidget';
+import { AddWidget } from './Widgets/AddWidget';
+import { ScoreWidget } from './Widgets/ScoreWidget';
+import { Datapoint, TimeseriesWidget } from './Widgets/TimeseriesWidget';
 
 export const Dashboard = () => {
+  const context = React.useContext(ServiceContext);
+  const addSubscription = useSubscriptions();
+  const [target, setTarget] = React.useState(undefined as Target | undefined);
+  const [views, setViews] = React.useState([] as JSX.Element[]);
 
-  return (
-    <TargetView pageTitle="Dashboard" compactSelect={true} />
-  );
+  React.useEffect(() => {
+    addSubscription(
+      context.target.target().subscribe(setTarget)
+    );
+  }, [context, context.target]);
+
+  React.useEffect(() => {
+    const timeseries: Datapoint[] = [];
+    let accum = 0;
+    for (let i = 0; i < 5; i++) {
+      timeseries.push({
+        name: 'HttpStatusException',
+        x: i,
+        y: accum
+      });
+      accum += Math.floor(Math.random() * 20);
+    }
+    setViews(old => {
+      return [
+        <TargetDetailsWidget target={target} />,
+        <ScoreWidget title="Automated Analysis" scores={[
+          {
+            label: 'CPU Load',
+            description: 'CPU Load for the process',
+            value: Math.floor(Math.random() * 100)
+          },
+          {
+            label: 'Stop the World GC',
+            description: 'STW GC is slow and should be avoided',
+            value: Math.floor(Math.random() * 100)
+          },
+          {
+            label: 'Environment Variables',
+            description: 'Potentially sensitive information in Environment Variables',
+            value: Math.floor(Math.random() * 100)
+          },
+        ]} />,
+        <TimeseriesWidget title="Java Exceptions" data={timeseries} />,
+        <AddWidget />,
+      ];
+    });
+  }, [target]);
+
+  return (<>
+    <TargetView pageTitle="Dashboard" compactSelect={true} >
+      <Gallery hasGutter
+        minWidths={{
+          default: '100%',
+          md: '200px',
+          lg: '400px',
+        }}
+        maxWidths={{
+          md: '500px',
+          lg: '1fr',
+        }}>
+        {
+          views.map(view => <GalleryItem>{view}</GalleryItem>)
+        }
+      </Gallery>
+    </TargetView>
+  </>);
 
 }
