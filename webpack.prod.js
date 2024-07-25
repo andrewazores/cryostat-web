@@ -10,10 +10,15 @@ module.exports = merge(common('production'), {
   mode: 'production',
   cache: {
     type: 'filesystem',
+    store: 'pack',
     compression: 'gzip',
     cacheDirectory: path.resolve(__dirname, '.build_cache'),
+    buildDependencies: {
+      config: [__filename],
+    },
   },
   optimization: {
+    minimize: true,
     minimizer: [
       new TerserJSPlugin({
         terserOptions: {
