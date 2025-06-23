@@ -160,8 +160,8 @@ export const ActiveRecordingsTable: React.FC<ActiveRecordingsTableProps> = (prop
     STOP: false,
   });
   const [sortBy, getSortParams] = useSort();
-  const [reportRefresh] = React.useState(new Subject<void>());
-  const handleReportRefresh = React.useCallback(() => reportRefresh.next(), [reportRefresh]);
+  const reportRefresh = React.useRef(new Subject<void>());
+  const handleReportRefresh = React.useCallback(() => reportRefresh.current.next(), [reportRefresh]);
 
   const targetRecordingFilters = useSelector((state: RootState) => {
     const filters = state.recordingFilters.list.filter(
@@ -555,7 +555,7 @@ export const ActiveRecordingsTable: React.FC<ActiveRecordingsTableProps> = (prop
             </DrawerActions>
           </DrawerHead>
           <DrawerPanelBody>
-            <TargetAnalysis target={target} refreshRequest={reportRefresh} />
+            <TargetAnalysis target={target} refreshRequest={reportRefresh.current} />
           </DrawerPanelBody>
         </DrawerPanelContent>
       ) : undefined,
