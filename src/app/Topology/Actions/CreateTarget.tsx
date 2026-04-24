@@ -515,8 +515,23 @@ export const SampleNodeDonut: React.FC<SampleNodeDonutProps> = ({
                     'sample-node-donut__node-icon',
                     validation.option !== ValidatedOptions.default ? validation.option : '',
                   )}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100%',
+                  }}
                 >
-                  <Bullseye>{testing ? <LinearDotSpinner /> : <img src={openjdkSvg} alt="Cryostat Logo" />}</Bullseye>
+                  {testing ? (
+                    <LinearDotSpinner />
+                  ) : (
+                    <img
+                      src={openjdkSvg}
+                      alt="Cryostat Logo"
+                      style={{ width: '50%', height: '50%', objectFit: 'contain' }}
+                    />
+                  )}
                 </div>
                 <div className={'sample-node-donut__status-indicator'}>{statusIcon.icon}</div>
               </div>
