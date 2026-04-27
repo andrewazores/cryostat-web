@@ -16,6 +16,7 @@
 
 import cryostatSvg from '@app/assets/cryostat_icon_rgb_default.svg';
 import openjdkSvg from '@app/assets/openjdk.svg';
+import { MATCH_EXPRES_VIS_GRAPH_ID } from '@app/Shared/Components/MatchExpression/MatchExpressionVisualizer';
 import { RootState } from '@app/Shared/Redux/ReduxStore';
 import { TargetNode } from '@app/Shared/Services/api.types';
 import { includesTarget } from '@app/Shared/Services/api.utils';
@@ -101,14 +102,20 @@ const CustomNode: React.FC<CustomNodeProps> = ({
 
   const graphId = React.useMemo(() => element.getGraph().getId(), [element]);
 
-  const classNames = React.useMemo(() => css('topology__target-node', matched ? '' : 'search-inactive'), [matched]);
+  const classNames = React.useMemo(() => css('topology__target-node', !matched && 'search-inactive'), [matched]);
 
   const nodeDecorators = React.useMemo(() => (showStatus ? getNodeDecorators(element) : null), [element, showStatus]);
 
   React.useEffect(() => {
     addSubscription(
       matchedTargetSvc
-        .pipe(map((ts) => (ts ? includesTarget(ts, data.target) : graphId === TOPOLOGY_GRAPH_ID)))
+        .pipe(
+          map((ts) =>
+            ts
+              ? includesTarget(ts, data.target)
+              : graphId === TOPOLOGY_GRAPH_ID || graphId === MATCH_EXPRES_VIS_GRAPH_ID,
+          ),
+        )
         .subscribe(setMatched),
     );
   }, [graphId, addSubscription, setMatched, matchedTargetSvc, data.target]);

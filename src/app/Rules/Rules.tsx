@@ -580,7 +580,7 @@ export const RulesTable: React.FC<RulesTableProps> = () => {
         <></>
       </BreadcrumbPage>
       <Modal
-        appendTo={portalRoot}
+        appendTo={portalRoot()}
         isOpen={createRuleModalOpen}
         variant={ModalVariant.large}
         width="90vw"
