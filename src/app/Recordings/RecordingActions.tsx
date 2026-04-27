@@ -17,9 +17,7 @@ import { modalPrefillSetIntent, store } from '@app/Shared/Redux/ReduxStore';
 import { NotificationCategory, Recording, Target } from '@app/Shared/Services/api.types';
 import { CapabilitiesContext } from '@app/Shared/Services/Capabilities';
 import { NotificationsContext } from '@app/Shared/Services/Notifications.service';
-import { FeatureLevel } from '@app/Shared/Services/service.types';
 import { ServiceContext } from '@app/Shared/Services/Services';
-import { useFeatureLevel } from '@app/utils/hooks/useFeatureLevel';
 import { useSubscriptions } from '@app/utils/hooks/useSubscriptions';
 import { toPath } from '@app/utils/utils';
 import { useCryostatTranslation } from '@i18n/i18nextUtil';
@@ -53,7 +51,6 @@ export const RecordingActions: React.FC<RecordingActionsProps> = ({ recording, u
   const capabilities = React.useContext(CapabilitiesContext);
   const notifications = React.useContext(NotificationsContext);
   const navigate = useNavigate();
-  const activeLevel = useFeatureLevel();
   const [grafanaEnabled, setGrafanaEnabled] = React.useState(false);
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -122,7 +119,7 @@ export const RecordingActions: React.FC<RecordingActionsProps> = ({ recording, u
     }
 
     const jvmId = directory?.jvmId ?? recording.metadata.labels.find((v) => v.key === 'jvmId')?.value;
-    if (jvmId && activeLevel <= FeatureLevel.BETA) {
+    if (jvmId) {
       actionItems.push({
         title: t('RecordingActions.VIEW_IN_ANALYTICS'),
         key: 'view-in-analytics',
@@ -131,16 +128,7 @@ export const RecordingActions: React.FC<RecordingActionsProps> = ({ recording, u
     }
 
     return actionItems;
-  }, [
-    t,
-    handleDownloadRecording,
-    grafanaEnabled,
-    grafanaUpload,
-    directory,
-    recording,
-    activeLevel,
-    handleViewInAnalytics,
-  ]);
+  }, [t, handleDownloadRecording, grafanaEnabled, grafanaUpload, directory, recording, handleViewInAnalytics]);
 
   const onSelect = React.useCallback(
     (action: RowAction) => {
